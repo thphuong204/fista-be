@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 //Create schema
 const transactionSchema = mongoose.Schema(
   {
-    wallet: { type: String, required: true },
-    category: { type: String, enum: ["cash", "bank"], require: true },
+    wallet: { type: Object, required: true },
+    category: { type: Object, require: true },
     date: { type: Date, required: true },
     amount: { type: Number, required: true },
     description: { type: String, required: true }

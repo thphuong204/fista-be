@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const walletSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    type: { type: String, enum: [cash, bank], require: true },
-
+    classification: { type: String, enum: [cash, bank], require: true },
+    currency: { type: String, required: true}
   },
   {
     timestamps: true,
