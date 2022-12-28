@@ -95,3 +95,5 @@ transController.deleteTransaction = async (req, res, next) => {
     console.log("Delete transaction");
     res.status(200).send("Delete transaction!")
 }
+
+module.exports = transController;
