@@ -1,0 +1,477 @@
+openapi: 3.0.0
+info:
+  title: Fista Personal Finance
+  version: "1.0.0"
+
+paths:
+  /trans:
+    post:
+      tags:
+        - Trans
+      summary: Add a new transaction 
+      operationId: addTrans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                wallet:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: mongo_id
+                    name:
+                      type: string
+                    classification:
+                      type: string
+                category:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: mongo_id
+                    name:
+                      type: string
+                    classification:
+                      type: string
+                date:
+                  type: string
+                amount:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '400':
+          description: Invalid input
+        '201':
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trans'  
+    get:
+      tags:
+        - Trans
+      summary: Get information of transactions
+      parameters:
+        - in: query
+          name: description
+          schema:
+            type: string
+          required: false
+          description: Description of transaction
+        - in: query
+          name: wallet
+          schema:
+            type: string
+          required: false
+          description: Name of wallet
+        - in: query
+          name: category
+          schema:
+            type: string
+          required: false 
+          description: Name of category
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: Transaction not found
+        '200':
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trans'            
+  /trans/{id}:
+    get:
+      tags:
+        - Trans
+      summary: Get information of a transaction
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the Trans
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: Transaction not found
+        '200':
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trans'
+    put:
+      tags:
+        - Trans
+      summary: Update an existing transaction
+      operationId: updateTransaction
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                assignee:
+                  type: string
+                removeAssignee:
+                  type: string
+                  enum: [no, yes]
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: Transaction not found
+        '200':
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trans'
+    delete:
+      tags:
+        - Trans
+      summary: Delete a transaction
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the transaction
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: Transaction not found
+        '204':
+          description: Deleted, no content
+          
+  /users:
+    post:
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                role: 
+                  type: string
+                  enum: [employee, manager]
+      responses:
+        '400':
+          description: Invalid input
+        '201':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'  
+    get:
+      tags:
+        - User
+      parameters:
+        
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [manager, employee]
+          required: false
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false  
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPagination'            
+  /users/{id}:
+    get:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '200':
+          description: user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                role: 
+                  type: string
+                  enum: [employee, manager]
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: User not found
+        '200':
+          description: Updated User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: User not found
+        '204':
+          description: Deleted, no content
+          
+      
+  
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: mongo_id
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string  
+          description: default to employee if empty
+          enum: [user, admin]
+        trans:
+          type: array
+          items:
+            type: object
+            properties:
+              _id: 
+                type: string
+                format: mongo_id
+              wallet:
+                type: string
+              category:
+                type: string
+              date: 
+                type: string
+                format: date-time
+              amount:
+                type: number
+              description: 
+                type: string
+              is_deleted:
+                type: string
+        is_deleted: 
+          type: boolean
+          example: false
+        updated_at: 
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time  
+      required: 
+        - name
+        - email
+        - password
+    UserPagination:
+      type: object
+      properties: 
+        total:
+          type: number
+        page_size: 
+          type: number
+        page_number: 
+          type: number
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    Wallet:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: mongo_id
+        name:
+          type: string
+        classification:
+          type: string
+          enum: [cash, bank, receivable, liability, equity]
+        user:
+          type: object
+          properties:
+            _id: 
+              type: string
+              format: mongo_id
+            name:
+              type: string
+            email:
+              type: string
+      required:
+        - name
+        - classification
+        - user
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: mongo_id
+        name:
+          type: string
+        classification:
+          type: string
+          enum: [income, expense, inflow, outflow]
+      required:
+      - name
+      - classification
+    Trans: 
+        type: object
+        properties:
+          _id:
+            type: string
+            format: mongo_id
+          wallet: 
+            type: object
+            properties:
+              _id:
+                type: string
+                format: mongo_id
+              name:
+                type: string
+              classification:
+                type: string
+                enum: [cash, bank, receivable, liability, equity]
+          category:
+            type: object
+            properties:
+              _id:
+                type: string
+                format: mongo_id
+              name: 
+                type: string
+              classification: 
+                type: string
+                enum: [income, expense, inflow, outflow]
+          date:
+            type: string
+            format: date-time
+          amount:
+            type: number
+          description: 
+            type: string
+          user:
+            type: object
+            properties:
+              id:
+                type: string
+                format: mongo_id
+              name:
+                type: string
+              email:
+                type: string
+              role:
+                type: string
+          is_deleted: 
+            type: boolean
+            example: false
+          updated_at: 
+            type: string
+            format: date-time
+          created_at:
+            type: string
+            format: date-time
+        required: 
+          - wallet
+          - category
+          - date
+          - amount
+          - description
+    TransPagination:
+      type: object
+      properties: 
+        total:
+          type: number
+        page_size: 
+          type: number
+        page_number: 
+          type: number
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/Trans'    
+        
