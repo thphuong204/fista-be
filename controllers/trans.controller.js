@@ -82,6 +82,8 @@ transController.getTransactions = async (req, res, next) => {
     }
   };
 
+
+
 // Updating transaction
 //Initialize
 transController.updateTransaction = async (req, res, next) => {
@@ -94,6 +96,13 @@ transController.updateTransaction = async (req, res, next) => {
 transController.deleteTransaction = async (req, res, next) => {
     console.log("Delete transaction");
     res.status(200).send("Delete transaction!")
+}
+
+// Get transaction by id
+//Initialize
+transController.getTransactionById = async (req, res, next) => {
+  console.log("getTransactionById");
+  res.status(200).send("getTransactionById")
 }
 
 module.exports = transController;

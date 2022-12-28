@@ -4,7 +4,18 @@ const walletSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
     classification: { type: String, enum: [cash, bank], require: true },
-    currency: { type: String, required: true}
+    currency: { 
+      type: String, 
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+    },
+    is_deleted: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,
