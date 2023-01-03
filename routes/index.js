@@ -2,6 +2,10 @@ const { sendResponse, AppError}=require("../helpers/utils.js")
 var express = require('express');
 var router = express.Router();
 
+// authApi
+const authApi = require("./auth.api");
+router.use("/auth", authApi);
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.status(200).send("Welcome to CoderSchool!")
