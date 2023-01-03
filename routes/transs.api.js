@@ -9,11 +9,11 @@ const {
     getTransactionById,
   } = require("../controllers/trans.controller");
 
-//CREAT
+//CREATE
 /** 
     * @route POST /trans
     * @description Create a new transaction
-    * @body {wallet, category, date, amount, description}
+    * @body {user, wallet, category, date, amount, currency, description}
     * @access Login required
 
 */

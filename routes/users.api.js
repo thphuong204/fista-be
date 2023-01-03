@@ -9,7 +9,7 @@ const {
     deleteUser
 } = require("../controllers/user.controller");
 
-// CREAT
+// CREATE
 /** 
     * @route POST /users
     * @description Create a new user
@@ -40,8 +40,9 @@ router.get("/:_id", getUserById);
 // UPDATE
 // Update user's information
 /**
-    * @route GET /users/:id/?name=Phuong&password=123
+    * @route GET /users/:id
     * @description Update user's information
+    * @body {name, password}
     * @access Login required
   */
 router.put("/:_id", updateUser);

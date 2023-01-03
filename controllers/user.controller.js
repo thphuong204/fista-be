@@ -66,7 +66,7 @@ userController.getUserById = async (req, res, next) => {
         const { _id } = req.params;
     
         const userById = await User.findById(_id, {"password": 0});
-        if (!userById || (userById.is_deleted.toString() === "true")) {
+        if (!userById || (userById.is_deleted?.toString() === "true")) {
           throw new AppError(400, "User Not Found", "Bad Request")
           return
         }
@@ -88,7 +88,7 @@ userController.updateUser = async (req, res, next) => {
         const bodyToUpdate = req.body;
     
         const userById = await User.findById(_id, {"password": 0});
-        if (!userById || (userById.is_deleted.toString() === "true")) {
+        if (!userById || (userById.is_deleted?.toString() === "true")) {
           throw new AppError(400, "User Not Found", "Bad Request")
           return
         }
@@ -126,7 +126,7 @@ userController.deleteUser = async (req, res, next) => {
 
         //only delete user not yet deleted
         const idFoundCheck = await User.findById(_id)
-        if (!idFoundCheck || (idFoundCheck.is_deleted.toString() === "true")) {
+        if (!idFoundCheck || (idFoundCheck.is_deleted?.toString() === "true")) {
         throw new AppError(404,"User Not Found","Bad Request")
         return
         }
