@@ -18,6 +18,10 @@ const transactionSchema = mongoose.Schema(
       type: Number, 
       required: true 
     },
+    currency: {
+      type: String,
+      default: "vnd"
+    },
     description: { 
       type: String, 
       required: true 
