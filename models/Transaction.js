@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 const transactionSchema = mongoose.Schema(
   {
     wallet: { 
-      type: Object, 
-      required: true 
+      type: mongoose.SchemaTypes.ObjectId,
+      require: true
     },
     category: { 
-      type: Object, 
-      require: true 
+      type: mongoose.SchemaTypes.ObjectId,
+      require: true
     },
     date: { 
       type: Date, 
