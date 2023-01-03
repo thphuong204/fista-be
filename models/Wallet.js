@@ -15,6 +15,10 @@ const walletSchema = mongoose.Schema(
       type: String, 
       required: true
     },
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      require: true
+    },
     status: {
       type: String,
       enum: ["active", "inactive"],
