@@ -11,9 +11,19 @@ router.get('/', function(req, res, next) {
   res.status(200).send("Welcome to CoderSchool!")
 });
 
+// userApi
 const userAPI = require('./users.api');
 router.use('/users',userAPI);
 
+// walletApi
+const walletAPI = require('./wallets.api');
+router.use('/wallets',walletAPI);
+
+//categoryApi
+const categoryAPI = require('./categories.api');
+router.use('/categories',categoryAPI);
+
+// transApi
 const transAPI = require('./transs.api');
 router.use('/transs', transAPI)
 
