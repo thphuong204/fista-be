@@ -86,7 +86,7 @@ transController.getTransactions = async (req, res, next) => {
       filter.description = { $regex: tmpDescription, $options: "i" };
 
     const page_number = req.query.page || 1;
-    const page_size = req.query.limit || 10;
+    const page_size = req.query.limit || 20;
     //skip number
     let offset = page_size * (page_number - 1);
 
