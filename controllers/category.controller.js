@@ -38,12 +38,12 @@ categoryController.getCategories = async (req, res, next) => {
 categoryController.getCategoryById = async (req, res, next) => {
     try {
         if (!req.params._id)
-        throw new AppError(400, "User Id Not Found", "Bad Request");
+        throw new AppError(400, "Category Id Not Found", "Bad Request");
         const { _id } = req.params;
     
-        const categoryById = await Category.findById(_id, {"password": 0});
+        const categoryById = await Category.findById(_id);
         if (!categoryById || (categoryById.is_deleted?.toString() === "true")) {
-            throw new AppError(400, "User Not Found", "Bad Request")
+            throw new AppError(400, "Category Not Found", "Bad Request")
             return
         }
         sendResponse(res, 200, true, categoryById, null, "");
@@ -91,14 +91,14 @@ categoryController.deleteCategory = async (req, res, next) => {
         const { _id } = req.params;
         const options = { new: true };
 
-        //only delete user not yet deleted
+        //only delete category not yet deleted
         const idFoundCheck = await Category.findById(_id)
         if (!idFoundCheck || (idFoundCheck.is_deleted?.toString() === "true")) {
-        throw new AppError(404,"User Not Found","Bad Request")
+        throw new AppError(404,"Category Not Found","Bad Request")
         return
         }
 
-        const deletedCategory = await User.findByIdAndUpdate(
+        const deletedCategory = await Category.findByIdAndUpdate(
             _id,
             { is_deleted: true },
             options
