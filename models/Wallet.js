@@ -13,7 +13,7 @@ const walletSchema = mongoose.Schema(
     },
     currency: { 
       type: String, 
-      required: true
+      default: "vnd"
     },
     user: {
       type: mongoose.SchemaTypes.ObjectId,
@@ -22,6 +22,7 @@ const walletSchema = mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
+      default: "active"
     },
     is_deleted: {
       type: Boolean,
