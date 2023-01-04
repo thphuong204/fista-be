@@ -4,6 +4,131 @@ info:
   version: "1.0.0"
 
 paths:
+  /users:
+    post:
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                email: 
+                  type: string
+                password:
+                  type: string
+      responses:
+        '400':
+          description: Invalid input
+        '201':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'  
+    get:
+      tags:
+        - User
+      parameters:
+        
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [manager, employee]
+          required: false
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false  
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPagination'            
+  /users/{id}:
+    get:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+        '200':
+          description: user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                role: 
+                  type: string
+                  enum: [employee, manager]
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: User not found
+        '200':
+          description: Updated User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the user
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: User not found
+        '204':
+          description: Deleted, no content
   /trans:
     post:
       tags:
@@ -164,11 +289,10 @@ paths:
           description: Transaction not found
         '204':
           description: Deleted, no content
-          
-  /users:
+  /wallets:
     post:
       tags:
-        - User
+        - Wallet
       requestBody:
         required: true
         content:
@@ -178,21 +302,29 @@ paths:
               properties:
                 name: 
                   type: string
-                role: 
+                classification: 
                   type: string
-                  enum: [employee, manager]
+                user:
+                  type: string
+                  format: mongo_id
+                currency:
+                  type: string
+                  default: vnd
+                status:
+                  type: string
+                  default: active
       responses:
         '400':
           description: Invalid input
         '201':
-          description: User
+          description: Wallet
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'  
+                $ref: '#/components/schemas/Wallet'  
     get:
       tags:
-        - User
+        - Wallet
       parameters:
         
         - in: query
@@ -210,45 +342,45 @@ paths:
         '400':
           description: Bad request
         '404':
-          description: User not found
+          description: Wallet not found
         '200':
-          description: User
+          description: Wallet
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserPagination'            
-  /users/{id}:
+                $ref: '#/components/schemas/WalletPagination'                    
+  /wallets/{id}:
     get:
       tags:
-        - User
+        - Wallet
       parameters:
         - in: path
           name: id
           schema:
             type: string
           required: true
-          description: id of the user
+          description: id of the wallet
       responses:
         '400':
           description: Bad request
         '404':
-          description: User not found
+          description: Wallet not found
         '200':
-          description: user
+          description: Wallet
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Wallet'
     put:
       tags:
-        - User
+        - Wallet
       parameters:
         - in: path
           name: id
           schema:
             type: string
           required: true
-          description: id of the user
+          description: id of the wallet
       requestBody:
         required: true
         content:
@@ -258,38 +390,154 @@ paths:
               properties:
                 name: 
                   type: string
-                role: 
+                status: 
                   type: string
-                  enum: [employee, manager]
       responses:
         '400':
           description: Invalid request body
         '404':
-          description: User not found
+          description: Wallet not found
         '200':
-          description: Updated User
+          description: Updated Wallet
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Wallet'
     delete:
       tags:
-        - User
+        - Wallet
       parameters:
         - in: path
           name: id
           schema:
             type: string
           required: true
-          description: id of the user
+          description: id of the wallet
       responses:
         '400':
           description: Invalid request body
         '404':
-          description: User not found
+          description: Wallet not found
         '204':
           description: Deleted, no content
-          
+  /categories:
+    post:
+      tags:
+        - Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                classification: 
+                  type: string
+                wallet_type:
+                  type: string
+      responses:
+        '400':
+          description: Invalid input
+        '201':
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'  
+    get:
+      tags:
+        - Category
+      parameters:
+        
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false  
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+        '200':
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryPagination'                          
+  /categories/{id}:
+    get:
+      tags:
+        - Category
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the category
+      responses:
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+        '200':
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    put:
+      tags:
+        - Category
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                status: 
+                  type: string
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: Category not found
+        '200':
+          description: Updated Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    delete:
+      tags:
+        - Category
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the category
+      responses:
+        '400':
+          description: Invalid request body
+        '404':
+          description: Category not found
+        '204':
+          description: Deleted, no content
       
   
 externalDocs:
@@ -370,7 +618,7 @@ components:
           type: string
         classification:
           type: string
-          enum: [cash, bank, receivable, liability, equity]
+          enum: [cash/bank, receivable/liability, asset]
         user:
           type: object
           properties:
@@ -474,4 +722,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Trans'    
+    WalletPagination:
+      type: object
+      properties: 
+        total:
+          type: number
+        page_size: 
+          type: number
+        page_number: 
+          type: number
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'   
+    CategoryPagination:
+      type: object
+      properties: 
+        total:
+          type: number
+        page_size: 
+          type: number
+        page_number: 
+          type: number
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'   
         
