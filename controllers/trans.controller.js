@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Trans = require("../models/Transaction");
 const transController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
+const Transaction = require("../models/Transaction");
 
 // Create a new transaction
 transController.createTransaction = async (req, res, next) => {
@@ -106,27 +107,105 @@ transController.getTransactions = async (req, res, next) => {
   }
 };
 
+// Get transaction by id
+//Initialize
+transController.getTransactionById = async (req, res, next) => {
+  console.log("getTransactionById");
+  try {
+    if (!req.params._id)
+      throw new AppError(400, "Transaction Id Not Found", "Bad Request");
+    const { _id } = req.params;
 
+    const transactionById = await Transaction.findById(_id, {"password": 0});
+    if (!transactionById || (transactionById.is_deleted?.toString() === "true")) {
+      throw new AppError(400, "Transaction Not Found", "Bad Request")
+      return
+    }
+    sendResponse(res, 200, true, transactionById, null, "");
+  } catch (error) {
+    next(error);
+  }
+}
 
 // Updating transaction
 //Initialize
 transController.updateTransaction = async (req, res, next) => {
   console.log("Updating transaction");
-  res.status(200).send("Updating transaction!");
+  try {
+    if (!req.body || !req.params._id) {
+        throw new AppError(400, "Requiring body and id to update transaction", "Bad Request")
+        return
+    };
+    
+    const { _id } = req.params;
+    const bodyToUpdate = req.body;
+
+    const transactionById = await Transaction.findById(_id, {"password": 0});
+    if (!transactionById || (transactionById.is_deleted?.toString() === "true")) {
+      throw new AppError(400, "Transaction Not Found", "Bad Request")
+      return
+    }
+
+    const editKeyArr = ["category", "amount", "date", "description"];
+    const keywordArray = Object.keys(bodyToUpdate);
+    keywordArray.forEach((keyword) => {
+        if (!editKeyArr.includes(keyword))
+          throw new AppError(400,`Keyword ${keyword} is not accepted. Only 'category', 'amount', 'date'  or 'description' are accepted for updating`,"Bad request");
+        if (!bodyToUpdate[keyword]) delete bodyToUpdate[keyword];
+    });
+
+    const options = { new: true };
+    const updatedTransaction = await Transaction.findByIdAndUpdate(_id, bodyToUpdate, options);
+    if (!updatedTransaction) {
+        throw new AppError(404, "Transaction Not Found", "Bad request")
+        return
+    };
+
+    sendResponse(res, 200, true, updatedTransaction, null, "");
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Delete transaction
 //Initialize
 transController.deleteTransaction = async (req, res, next) => {
   console.log("Delete transaction");
-  res.status(200).send("Delete transaction!");
+  try {
+    if (!req.params._id) {
+        throw new AppError(404, "Transaction Not Found", "Bad request")
+        return
+    }
+    const { _id } = req.params;
+    const options = { new: true };
+
+    //only delete transaction not yet deleted
+    const idFoundCheck = await Transaction.findById(_id)
+    if (!idFoundCheck || (idFoundCheck.is_deleted?.toString() === "true")) {
+    throw new AppError(404,"Transaction Not Found","Bad Request")
+    return
+    }
+
+    const deletedTransaction = await Transaction.findByIdAndUpdate(
+        _id,
+        { is_deleted: true },
+        options
+    );
+
+    sendResponse(
+        res,
+        200,
+        true,
+        deletedTransaction,
+        null,
+        ""
+      );
+
+  } catch (error) {
+      next(error);
+  }
 };
 
-// Get transaction by id
-//Initialize
-transController.getTransactionById = async (req, res, next) => {
-  console.log("getTransactionById");
-  res.status(200).send("getTransactionById")
-}
+
 
 module.exports = transController;
