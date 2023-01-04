@@ -71,9 +71,9 @@ userController.getUserById = async (req, res, next) => {
           return
         }
         sendResponse(res, 200, true, userById, null, "");
-      } catch (error) {
-        next(error);
-      }
+    } catch (error) {
+      next(error);
+    }
 };
 
 // Update user
@@ -109,9 +109,9 @@ userController.updateUser = async (req, res, next) => {
         };
 
         sendResponse(res, 200, true, updatedUser, null, "");
-      } catch (error) {
-        next(error);
-      }
+    } catch (error) {
+      next(error);
+    }
 };
 
 // Delete user
