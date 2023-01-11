@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const bcrypt = require('bcryptjs');
 const userController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
 const users_role_array = ["user", "admin"];
@@ -9,17 +10,30 @@ userController.createUser = async ( req, res, next ) => {
     console.log("createUser");
     try {
         if (!req.body) throw new AppError(400, "No request body", "Bad Request");
-    
-        const createdUser = await User.create(req.body);
-        const noPasswordCreatedUser = await User.find({},{"password": 0})
-        console.log("createdUser", createdUser)
+        let { name, email, password } = req.body;
+
+        let user = await User.findOne({ email });
+        if (user) throw new AppError(409, "User already exists", "Register Error");
+
+        const salt = await bcrypt.genSalt(10);
+        password = await bcrypt.hash(password, salt);
+
+        const createdUser = await User.create({
+          name,
+          email,
+          password,
+        });
+        const accessToken = await createdUser.generateToken();
+
+        const noPasswordCreatedUser = await User.find({ email },{"password": 0})
+        
         console.log("noPasswordCreatedUser", noPasswordCreatedUser)
         
         sendResponse(
           res,
           200,
           true,
-          noPasswordCreatedUser,
+          { noPasswordCreatedUser, accessToken },
           null,
           ""
         );
