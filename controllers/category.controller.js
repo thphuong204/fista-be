@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Category = require("../models/Category");
 const categoryController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
+const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
 
 // Create a new category by Admin
 categoryController.createCategory = async (req, res, next) => {
@@ -27,7 +28,26 @@ categoryController.createCategory = async (req, res, next) => {
 // Get all categories by User, Admin
 categoryController.getCategories = async (req, res, next) => {
     try {
-        const data = await Category.find()
+        const acceptedFilterKeyArr = ["name", "page", "limit"];
+        const {...filter} = req.query;
+
+        keywordQueryCheck( filter, acceptedFilterKeyArr )
+
+        const page_number = Number.parseInt(req.query.page) || 1;
+        const page_size = Number.parseInt(req.query.limit) || 20; 
+        
+        let total = await Category.count(filter);
+        if (!total) {
+        throw new AppError (404,"Category Not Found","Bad request")
+        return
+        }
+
+        //skip number
+        let offset = page_size * (page_number - 1);
+        const listOfCategories = await Category.find(filter).skip(offset).limit(page_size);
+
+        let data = {total, page_size, page_number, items: listOfCategories};
+
         sendResponse(res, 200, true, data, null, "");
     } catch (error) {
         next(error)
