@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Wallet = require("../models/Wallet");
 const walletController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
+const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
 
 // Create a new wallet
 walletController.createWallet = async (req, res, next) => {
@@ -29,18 +30,13 @@ walletController.createWallet = async (req, res, next) => {
 walletController.getWallets = async (req, res, next) => {
     console.log("getWallet")
     try {
-        const filterKeyArr = ["user", "name"];
-        const filter = req.query;
-        const page_number = req.query.page || 1;
-        const page_size = req.query.limit || 20; 
+        const acceptedFilterKeyArr = ["user", "name", "page", "limit"];
+        const {...filter} = req.query;
 
-        const keywordArr = Object.keys(filter);
-        keywordArr.forEach((keyword) => {
-        if (!filterKeyArr.includes(keyword))
-            throw new AppError(400, `query ${keyword} is not accepted`, "Bad request");
-        if (!filter[keyword]) delete filter[keyword];
-        });
-
+        keywordQueryCheck( filter, acceptedFilterKeyArr )
+        const page_number = Number.parseInt(req.query.page) || 1;
+        const page_size = Number.parseInt(req.query.limit) || 20; 
+        
         let total = await Wallet.count(filter);
         if (!total) {
         throw new AppError (404,"Wallet Not Found","Bad request")
