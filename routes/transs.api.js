@@ -11,7 +11,7 @@ const {
 
 //CREATE
 /** 
-    * @route POST /trans
+    * @route POST /transs
     * @description Create a new transaction
     * @body {user, wallet, category, date, amount, currency, description}
     * @access Login required
@@ -37,7 +37,7 @@ router.get("/", getTransactions);
   * 
   * }
   */
-router.get("/:id", getTransactionById);
+router.get("/:_id", getTransactionById);
 
 //UPDATE
 /**
@@ -46,7 +46,7 @@ router.get("/:id", getTransactionById);
     * body {wallet, category, date, amount, description}
     * @access Login required
 */
-router.put("/:id", updateTransaction);
+router.put("/:_id", updateTransaction);
 
 //DELETE
 /**
@@ -54,6 +54,6 @@ router.put("/:id", updateTransaction);
     * @description Delete a transaction
     * @access Login required
 */
-router.delete("/:id", deleteTransaction);
+router.delete("/:_id", deleteTransaction);
 
 module.exports = router;

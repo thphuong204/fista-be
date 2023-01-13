@@ -36,7 +36,7 @@ router.get("/", getCategories);
   * 
   * }
   */
-router.get("/:id", getCategoryById);
+router.get("/:_id", getCategoryById);
 
 //UPDATE
 /**
@@ -45,7 +45,7 @@ router.get("/:id", getCategoryById);
     * body {name, classification, wallet_type}
     * @access Login required, role Admin required
 */
-router.put("/:id", updateCategory);
+router.put("/:_id", updateCategory);
 
 //DELETE
 /**
@@ -53,6 +53,6 @@ router.put("/:id", updateCategory);
     * @description Delete a category
     * @access Login required, role Admin required
 */
-router.delete("/:id", deleteCategory);
+router.delete("/:_id", deleteCategory);
 
 module.exports = router;
