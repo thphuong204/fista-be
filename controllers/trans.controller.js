@@ -41,7 +41,7 @@ transController.getTransactions = async (req, res, next) => {
       "page",
       "limit"
     ];
-    const filter = req.query;
+    const {...filter} = req.query;
 
     const {
       user: tmpUser,
@@ -54,9 +54,6 @@ transController.getTransactions = async (req, res, next) => {
     } = keywordQueryCheck (filter, acceptedFilterKeyArr);
 
     //mongoose support find with case insensitive
-    if (tmpUser) filter.user = { $regex: tmpUser, $options: "i" };
-    if (tmpWallet) filter.wallet = { $regex: tmpWallet, $options: "i" };
-    if (tmpCategory) filter.category = { $regex: tmpCategory, $options: "i" };
     if (tmpDescription) filter.description = { $regex: tmpDescription, $options: "i" };
 
     const page_number = req.query.page || 1;
@@ -111,7 +108,7 @@ transController.updateTransaction = async (req, res, next) => {
     };
     
     const { _id } = req.params;
-    const bodyToUpdate = req.body;
+    const {...bodyToUpdate} = req.body;
 
     const transactionById = await Transaction.findById(_id, {"password": 0});
     if (!transactionById || (transactionById.is_deleted?.toString() === "true")) {

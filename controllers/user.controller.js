@@ -27,13 +27,11 @@ userController.createUser = async ( req, res, next ) => {
 
         const noPasswordCreatedUser = await User.find({ email },{"password": 0})
         
-        console.log("noPasswordCreatedUser", noPasswordCreatedUser)
-        
         sendResponse(
           res,
           200,
           true,
-          { noPasswordCreatedUser, accessToken },
+          { createdUser, accessToken },
           null,
           ""
         );
@@ -46,7 +44,7 @@ userController.createUser = async ( req, res, next ) => {
 userController.getUsers = async ( req, res, next ) => {
 
     const filterKeyArr = ["name", "email"];
-    const filter = req.query;
+    const {...filter} = req.query;
     const page_number = req.query.page || 1;
     const page_size = req.query.limit || 10; 
 
@@ -99,7 +97,7 @@ userController.updateUser = async (req, res, next) => {
         };
         
         const { _id } = req.params;
-        const bodyToUpdate = req.body;
+        const {...bodyToUpdate} = req.body;
     
         const userById = await User.findById(_id, {"password": 0});
         if (!userById || (userById.is_deleted?.toString() === "true")) {
