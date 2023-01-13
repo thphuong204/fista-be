@@ -10,7 +10,7 @@ const {
   authController.loginWithEmail = catchErrAsync(async (req, res, next) => {
     try {
       const { email, password } = req.body;
-      const user = await User.findOne({ email });
+      let user = await User.findOne({ email });
       console.log("password",  password);
 
       if (!user)
@@ -22,7 +22,8 @@ const {
         throw new AppError(400, "Wrong password", "Login Error")
         return
       };
-    
+      
+      user = await User.findOne({ email }, {"password": 0})
       accessToken = await user.generateToken();
       console.log("accessToken", accessToken)
       return sendResponse(
