@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
-const Trans = require("../models/Transaction");
+const Transaction = require("../models/Transaction");
 const transController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
-const Transaction = require("../models/Transaction");
+const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
 
 // Create a new transaction
 transController.createTransaction = async (req, res, next) => {
@@ -12,32 +12,13 @@ transController.createTransaction = async (req, res, next) => {
 
     //need to verrify the transaction
 
-    const createdTrans = await Trans.create(req.body);
-    const id = createdTrans._id;
-    const wallet = createdTrans.wallet;
-    const category = createdTrans.category;
-    const date = createdTrans.date;
-    const amount = createdTrans.amount;
-    const description = createdTrans.description;
-    const is_deleted = createdTrans.is_deleted;
-    const created_at = createdTrans.createdAt;
-    const updated_at = createdTrans.updatedAt;
+    const createdTrans = await Transaction.create(req.body);
 
     sendResponse(
       res,
       200,
       true,
-      {
-        id,
-        wallet,
-        category,
-        date,
-        amount,
-        description,
-        is_deleted,
-        created_at,
-        updated_at,
-      },
+      createdTrans,
       null,
       ""
     );
@@ -49,53 +30,45 @@ transController.createTransaction = async (req, res, next) => {
 // Get all transactions
 transController.getTransactions = async (req, res, next) => {
   try {
-    const filterKeyArr = [
+    const acceptedFilterKeyArr = [
+      "user",
       "wallet",
       "category",
       "fromDate",
       "toDate",
       "amount",
       "description",
+      "page",
+      "limit"
     ];
-    const { ...filter } = req.query;
-
-    const keywordArr = Object.keys(filter);
-    keywordArr.forEach((keyword) => {
-      if (!filterKeyArr.includes(keyword))
-        throw new AppError(
-          400,
-          `query ${keyword} is not accepted`,
-          "Bad request"
-        );
-      if (!filter[keyword]) delete filter[keyword];
-    });
+    const filter = req.query;
 
     const {
+      user: tmpUser,
       wallet: tmpWallet,
       category: tmpCategory,
       fromDate: fromDate,
       toDate: toDate,
       amount: tmpAmount,
       description: tmpDescription,
-    } = filter;
+    } = keywordQueryCheck (filter, acceptedFilterKeyArr);
 
-    filter.is_deleted = false;
     //mongoose support find with case insensitive
+    if (tmpUser) filter.user = { $regex: tmpUser, $options: "i" };
     if (tmpWallet) filter.wallet = { $regex: tmpWallet, $options: "i" };
     if (tmpCategory) filter.category = { $regex: tmpCategory, $options: "i" };
-    if (tmpDescription)
-      filter.description = { $regex: tmpDescription, $options: "i" };
+    if (tmpDescription) filter.description = { $regex: tmpDescription, $options: "i" };
 
     const page_number = req.query.page || 1;
     const page_size = req.query.limit || 20;
     //skip number
     let offset = page_size * (page_number - 1);
 
-    const listOfTranss = await Trans.find(filter).skip(offset).limit(page_size);
+    const listOfTranss = await Transaction.find(filter).sort({ date: -1 }).skip(offset).limit(page_size);
 
-    let total = await Trans.count(filter);
+    let total = await Transaction.count(filter);
     if (!total) {
-      throw new AppError(404, "Trans Not Found", "Bad request");
+      throw new AppError(404, "Transaction Not Found", "Bad request");
       return;
     }
 
@@ -146,13 +119,9 @@ transController.updateTransaction = async (req, res, next) => {
       return
     }
 
-    const editKeyArr = ["category", "amount", "date", "description"];
-    const keywordArray = Object.keys(bodyToUpdate);
-    keywordArray.forEach((keyword) => {
-        if (!editKeyArr.includes(keyword))
-          throw new AppError(400,`Keyword ${keyword} is not accepted. Only 'category', 'amount', 'date'  or 'description' are accepted for updating`,"Bad request");
-        if (!bodyToUpdate[keyword]) delete bodyToUpdate[keyword];
-    });
+    const acceptedFilterKeyArr = ["category", "amount", "date", "description"];
+
+    keywordBodyCheck(bodyToUpdate, acceptedFilterKeyArr);
 
     const options = { new: true };
     const updatedTransaction = await Transaction.findByIdAndUpdate(_id, bodyToUpdate, options);
