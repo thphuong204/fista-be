@@ -34,8 +34,6 @@ walletController.getWallets = async (req, res, next) => {
         const {...filter} = req.query;
 
         keywordQueryCheck( filter, acceptedFilterKeyArr )
-        const page_number = Number.parseInt(req.query.page) || 1;
-        const page_size = Number.parseInt(req.query.limit) || 20; 
         
         let total = await Wallet.count(filter);
         if (!total) {
@@ -43,6 +41,14 @@ walletController.getWallets = async (req, res, next) => {
         return
         }
 
+        const page_number = Number.parseInt(req.query.page) || 1;
+        let page_size = null;
+        if (req?.query?.limit === "all") {
+           page_size = total;
+        } else {
+           page_size = Number.parseInt(req.query.limit) || 20; 
+        }
+        
         //skip number
         let offset = page_size * (page_number - 1);
         const listOfWallets = await Wallet.find(filter).skip(offset).limit(page_size);
