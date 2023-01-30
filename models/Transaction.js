@@ -2,12 +2,19 @@ const mongoose = require("mongoose");
 //Create schema
 const transactionSchema = mongoose.Schema(
   {
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      required: true
+    },
     wallet: { 
       type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Wallet',
       require: true
     },
     category: { 
       type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Category',
       require: true
     },
     date: { 
