@@ -6,7 +6,8 @@ validateHelper.keywordQueryCheck = (query, acceptedFilterKeyArr) => {
     // Remove page, limit out of query. These factors will be used directly when finding in collections
     query.page = "";
     query.limit = "";
-
+    query.accesToken = "";
+    
     keywordQuerryArr.forEach((keyword) => {
         if (!acceptedFilterKeyArr.includes(keyword)) {
             throw new AppError(

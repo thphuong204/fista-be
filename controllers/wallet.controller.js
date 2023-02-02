@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Wallet = require("../models/Wallet");
+const jwt_decode = require('jwt-decode');
 const walletController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
 const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
@@ -11,7 +12,9 @@ walletController.createWallet = async (req, res, next) => {
         if (!req.body) throw new AppError(400, "No request body", "Bad Request");
         
         // need to validate body before creating new wallet
-        const createdWallet = await Wallet.create(req.body);
+        const {accessToken, name, classification} = req.body;
+        let user = jwt_decode(accessToken)._id
+        const createdWallet = await Wallet.create({user, name, classification});
         
         sendResponse(
           res,
@@ -30,17 +33,19 @@ walletController.createWallet = async (req, res, next) => {
 walletController.getWallets = async (req, res, next) => {
     console.log("getWallet")
     try {
-        const acceptedFilterKeyArr = ["user", "name", "page", "limit"];
+        const acceptedFilterKeyArr = ["accessToken", "name", "page", "limit"];
         const {...filter} = req.query;
-
         keywordQueryCheck( filter, acceptedFilterKeyArr )
         
-        let total = await Wallet.count(filter);
+        let userDecoded = jwt_decode(req?.query?.accessToken)._id
+        filter.user = userDecoded;
+
+        let total = await Wallet.countDocuments(filter);
         if (!total) {
         throw new AppError (404,"Wallet Not Found","Bad request")
         return
         }
-
+        
         const page_number = Number.parseInt(req.query.page) || 1;
         let page_size = null;
         if (req?.query?.limit === "all") {
@@ -51,7 +56,10 @@ walletController.getWallets = async (req, res, next) => {
         
         //skip number
         let offset = page_size * (page_number - 1);
-        const listOfWallets = await Wallet.find(filter).skip(offset).limit(page_size);
+        const listOfWallets = await Wallet.find(filter)
+          .sort({classification: 1, name: 1 })
+          .skip(offset)
+          .limit(page_size);
 
         let data = {total, page_size, page_number,  items: listOfWallets};
 
