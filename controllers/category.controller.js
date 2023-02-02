@@ -28,23 +28,32 @@ categoryController.createCategory = async (req, res, next) => {
 // Get all categories by User, Admin
 categoryController.getCategories = async (req, res, next) => {
     try {
-        const acceptedFilterKeyArr = ["name", "page", "limit"];
+        const acceptedFilterKeyArr = ["user", "name", "page", "limit"];
         const {...filter} = req.query;
 
         keywordQueryCheck( filter, acceptedFilterKeyArr )
+        console.log("filter:", filter)
 
-        const page_number = Number.parseInt(req.query.page) || 1;
-        const page_size = Number.parseInt(req.query.limit) || 20; 
-        
-        let total = await Category.count(filter);
+        let total = await Category.countDocuments(filter);
         if (!total) {
-        throw new AppError (404,"Category Not Found","Bad request")
+        throw new AppError(404,"Category Not Found","Bad request")
         return
         }
-
+        
+        const page_number = Number.parseInt(req.query.page) || 1;
+        let page_size = null;
+        if (req?.query?.limit === "all") {
+           page_size = total;
+        } else {
+           page_size = Number.parseInt(req.query.limit) || 20; 
+        }
+        console.log( "page_size: ", page_size)
         //skip number
         let offset = page_size * (page_number - 1);
-        const listOfCategories = await Category.find(filter).skip(offset).limit(page_size);
+        const listOfCategories = await Category.find(filter)
+            .sort({classification: 1, name: 1 })
+            .skip(offset)
+            .limit(page_size);
 
         let data = {total, page_size, page_number, items: listOfCategories};
 

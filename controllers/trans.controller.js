@@ -61,9 +61,13 @@ transController.getTransactions = async (req, res, next) => {
     //skip number
     let offset = page_size * (page_number - 1);
 
-    const listOfTranss = await Transaction.find(filter).sort({ date: -1 }).skip(offset).limit(page_size);
+    const listOfTranss = await Transaction.find(filter)
+    .populate("category")
+    .sort({ date: -1 })
+    .skip(offset)
+    .limit(page_size);
 
-    let total = await Transaction.count(filter);
+    let total = await Transaction.countDocuments(filter);
     if (!total) {
       throw new AppError(404, "Transaction Not Found", "Bad request");
       return;
