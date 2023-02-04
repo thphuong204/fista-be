@@ -11,8 +11,16 @@ transController.createTransaction = async (req, res, next) => {
     if (!req.body) throw new AppError(400, "No request body", "Bad Request");
 
     //need to verrify the transaction
-
-    const createdTrans = await Transaction.create(req.body);
+    const  { wallet, category, date, amount, description } = req.body;
+    const user = req.user;
+    const createdTrans = await Transaction.create({
+      user, 
+      wallet, 
+      category, 
+      date, 
+      amount, 
+      description 
+    });
 
     sendResponse(
       res,
@@ -31,7 +39,6 @@ transController.createTransaction = async (req, res, next) => {
 transController.getTransactions = async (req, res, next) => {
   try {
     const acceptedFilterKeyArr = [
-      "user",
       "wallet",
       "category",
       "fromDate",
@@ -44,7 +51,6 @@ transController.getTransactions = async (req, res, next) => {
     const {...filter} = req.query;
 
     const {
-      user: tmpUser,
       wallet: tmpWallet,
       category: tmpCategory,
       fromDate: fromDate,
@@ -54,6 +60,7 @@ transController.getTransactions = async (req, res, next) => {
     } = keywordQueryCheck (filter, acceptedFilterKeyArr);
 
     //mongoose support find with case insensitive
+    filter.user = req.user
     if (tmpDescription) filter.description = { $regex: tmpDescription, $options: "i" };
 
     const page_number = req.query.page || 1;
@@ -88,9 +95,10 @@ transController.getTransactionById = async (req, res, next) => {
   try {
     if (!req.params._id)
       throw new AppError(400, "Transaction Id Not Found", "Bad Request");
+    const user = req.user;
     const { _id } = req.params;
 
-    const transactionById = await Transaction.findById(_id, {"password": 0});
+    const transactionById = await Transaction.find(_id, user);
     if (!transactionById || (transactionById.is_deleted?.toString() === "true")) {
       throw new AppError(400, "Transaction Not Found", "Bad Request")
       return
@@ -110,11 +118,11 @@ transController.updateTransaction = async (req, res, next) => {
         throw new AppError(400, "Requiring body and id to update transaction", "Bad Request")
         return
     };
-    
+    const user = req.user
     const { _id } = req.params;
     const {...bodyToUpdate} = req.body;
 
-    const transactionById = await Transaction.findById(_id, {"password": 0});
+    const transactionById = await Transaction.find(_id, user);
     if (!transactionById || (transactionById.is_deleted?.toString() === "true")) {
       throw new AppError(400, "Transaction Not Found", "Bad Request")
       return
@@ -123,6 +131,7 @@ transController.updateTransaction = async (req, res, next) => {
     const acceptedFilterKeyArr = ["category", "amount", "date", "description"];
 
     keywordBodyCheck(bodyToUpdate, acceptedFilterKeyArr);
+    bodyToUpdate.user = user;
 
     const options = { new: true };
     const updatedTransaction = await Transaction.findByIdAndUpdate(_id, bodyToUpdate, options);
@@ -146,11 +155,12 @@ transController.deleteTransaction = async (req, res, next) => {
         throw new AppError(404, "Transaction Not Found", "Bad request")
         return
     }
+    const user = req.user
     const { _id } = req.params;
     const options = { new: true };
 
     //only delete transaction not yet deleted
-    const idFoundCheck = await Transaction.findById(_id)
+    const idFoundCheck = await Transaction.find(_id, user)
     if (!idFoundCheck || (idFoundCheck.is_deleted?.toString() === "true")) {
     throw new AppError(404,"Transaction Not Found","Bad Request")
     return

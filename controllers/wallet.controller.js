@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Wallet = require("../models/Wallet");
-const jwt_decode = require('jwt-decode');
 const walletController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
 const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
@@ -11,9 +10,9 @@ walletController.createWallet = async (req, res, next) => {
     try {
         if (!req.body) throw new AppError(400, "No request body", "Bad Request");
         
-        // need to validate body before creating new wallet
-        const {accessToken, name, classification} = req.body;
-        let user = jwt_decode(accessToken)._id
+        // need to validate body before creating new wallet\
+        const user = req.user;
+        const {name, classification} = req.body;
         const createdWallet = await Wallet.create({user, name, classification});
         
         sendResponse(
@@ -33,12 +32,11 @@ walletController.createWallet = async (req, res, next) => {
 walletController.getWallets = async (req, res, next) => {
     console.log("getWallet")
     try {
-        const acceptedFilterKeyArr = ["accessToken", "name", "page", "limit"];
+        const acceptedFilterKeyArr = ["name", "page", "limit"];
         const {...filter} = req.query;
         keywordQueryCheck( filter, acceptedFilterKeyArr )
         
-        let userDecoded = jwt_decode(req?.query?.accessToken)._id
-        filter.user = userDecoded;
+        filter.user = req.user;
 
         let total = await Wallet.countDocuments(filter);
         if (!total) {
@@ -76,6 +74,7 @@ walletController.getWalletById = async (req, res, next) => {
         if (!req.params._id)
           throw new AppError(400, "Wallet Id Not Found", "Bad Request");
         const { _id } = req.params;
+        let user = req.user
     
         const walletById = await Wallet.findById(_id);
         if (!walletById || (walletById.is_deleted?.toString() === "true")) {
@@ -99,14 +98,14 @@ walletController.updateWallet = async (req, res, next) => {
         
         const { _id } = req.params;
         const bodyToUpdate = req.body;
-    
-        const walletById = await Wallet.findById(_id);
+        let user = req.user;
+        const walletById = await Wallet.find({user, _id});
         if (!walletById || (walletById.is_deleted?.toString() === "true")) {
           throw new AppError(400, "Wallet Not Found", "Bad Request")
           return
         }
 
-        const editKeyArr = ["name", "status"];
+        const editKeyArr = ["name", "classification"];
         const keywordArray = Object.keys(bodyToUpdate);
         keywordArray.forEach((keyword) => {
             if (!editKeyArr.includes(keyword))
@@ -135,6 +134,7 @@ walletController.deleteWallet = async (req, res, next) => {
             throw new AppError(404, "Wallet Not Found", "Bad request")
             return
         }
+        let user = req.user;
         const { _id } = req.params;
         const options = { new: true };
 

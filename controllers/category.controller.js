@@ -28,11 +28,12 @@ categoryController.createCategory = async (req, res, next) => {
 // Get all categories by User, Admin
 categoryController.getCategories = async (req, res, next) => {
     try {
-        const acceptedFilterKeyArr = ["user", "name", "page", "limit"];
+        const acceptedFilterKeyArr = ["accessToken", "name", "page", "limit"];
         const {...filter} = req.query;
 
         keywordQueryCheck( filter, acceptedFilterKeyArr )
         console.log("filter:", filter)
+        const {accessToken, name, classification} = req.body;
 
         let total = await Category.countDocuments(filter);
         if (!total) {
