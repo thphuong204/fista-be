@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authentification = require("../helpers/authentication");
 
 const {
     createWallet,
@@ -16,7 +17,11 @@ const {
 * body {name, classification, currency, user}
 * @access Login required
 */
-router.post("/", createWallet);
+router.post(
+  "/", 
+  authentification.loginRequired,
+  createWallet
+);
 
 // READ
 // Get all wallets
@@ -25,7 +30,11 @@ router.post("/", createWallet);
     * @description Get list of wallets
     * @access Login required
   */
-router.get("/", getWallets);
+router.get(
+  "/", 
+  authentification.loginRequired,
+  getWallets
+);
 
 // READ
 // Get wallet by id
@@ -34,7 +43,11 @@ router.get("/", getWallets);
     * @description Get information about wallet
     * @access Login required
   */
-router.get("/:_id", getWalletById);
+router.get(
+  "/:_id", 
+  authentification.loginRequired,
+  getWalletById
+);
 
 // UPDATE
 // Update wallet's information
@@ -44,7 +57,11 @@ router.get("/:_id", getWalletById);
     * @body {name, status}
     * @access Login required
   */
-router.put("/:_id", updateWallet);
+router.put(
+  "/:_id", 
+  authentification.loginRequired,
+  updateWallet
+);
 
 //DELETE
 /**
@@ -52,6 +69,10 @@ router.put("/:_id", updateWallet);
     * @description Delete a wallet
     * @access Login required
 */
-router.delete("/:_id", deleteWallet);
+router.delete(
+  "/:_id", 
+  authentification.loginRequired,
+  deleteWallet
+);
 
 module.exports = router

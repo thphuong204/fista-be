@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authentification = require("../helpers/authentication")
 
 const {
     createTransaction,
@@ -18,7 +19,11 @@ const {
 
 */
 
-router.post("/", createTransaction);
+router.post(
+  "/", 
+  authentification.loginRequired,
+  createTransaction
+);
 
 //READ
 /**
@@ -26,7 +31,11 @@ router.post("/", createTransaction);
     * @description Get transactions of a wallet
     * @access Login required
   */
-router.get("/", getTransactions);
+router.get(
+  "/", 
+  authentification.loginRequired,
+  getTransactions
+);
 
 
 //READ
@@ -37,7 +46,11 @@ router.get("/", getTransactions);
   * 
   * }
   */
-router.get("/:_id", getTransactionById);
+router.get(
+  "/:_id", 
+  authentification.loginRequired, 
+  getTransactionById
+);
 
 //UPDATE
 /**
@@ -46,7 +59,11 @@ router.get("/:_id", getTransactionById);
     * body {wallet, category, date, amount, description}
     * @access Login required
 */
-router.put("/:_id", updateTransaction);
+router.put(
+  "/:_id", 
+  authentification.loginRequired,
+  updateTransaction
+);
 
 //DELETE
 /**
@@ -54,6 +71,10 @@ router.put("/:_id", updateTransaction);
     * @description Delete a transaction
     * @access Login required
 */
-router.delete("/:_id", deleteTransaction);
+router.delete(
+  "/:_id", 
+  authentification.loginRequired,
+  deleteTransaction
+);
 
 module.exports = router;

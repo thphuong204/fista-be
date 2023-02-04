@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authentification = require("../helpers/authentication");
 
 const {
     createUser,
@@ -26,7 +27,11 @@ router.post("/", createUser);
     * @description Get list of users
     * @access Login required
   */
-router.get("/", getUsers);
+router.get(
+  "/", 
+  authentification.loginRequired,
+  getUsers
+);
 
 // READ
 // Get user by id
@@ -35,7 +40,11 @@ router.get("/", getUsers);
     * @description Get information about user
     * @access Login required
   */
-router.get("/:_id", getUserById);
+router.get(
+  "/:_id", 
+  authentification.loginRequired,
+  getUserById
+);
 
 // UPDATE
 // Update user's information
@@ -45,7 +54,11 @@ router.get("/:_id", getUserById);
     * @body {name, password}
     * @access Login required
   */
-router.put("/:_id", updateUser);
+router.put(
+  "/:_id", 
+  authentification.loginRequired,
+  updateUser
+);
 
 //DELETE
 /**
@@ -53,7 +66,11 @@ router.put("/:_id", updateUser);
     * @description Delete a user
     * @access Login required
 */
-router.delete("/:_id", deleteUser);
+router.delete(
+  "/:_id", 
+  authentification.loginRequired, 
+  deleteUser
+);
 
 
 module.exports = router

@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authentification = require("../helpers/authentication");
+
 const {
     createCategory,
     getCategories, 
@@ -16,7 +18,11 @@ const {
     * @access Login required, role Admin required
 
 */
-router.post("/", createCategory);
+router.post(
+    "/", 
+    authentification.loginRequired,
+    createCategory
+);
 
 
 // READ
@@ -26,7 +32,11 @@ router.post("/", createCategory);
     * @description Get list of categories
     * @access Login required
   */
-router.get("/", getCategories);
+router.get(
+    "/", 
+    authentification.loginRequired,
+    getCategories
+);
 
 //READ
 /**
@@ -36,7 +46,11 @@ router.get("/", getCategories);
   * 
   * }
   */
-router.get("/:_id", getCategoryById);
+router.get(
+    "/:_id", 
+    authentification.loginRequired,
+    getCategoryById
+);
 
 //UPDATE
 /**
@@ -45,7 +59,11 @@ router.get("/:_id", getCategoryById);
     * body {name, classification, wallet_type}
     * @access Login required, role Admin required
 */
-router.put("/:_id", updateCategory);
+router.put(
+    "/:_id",
+    authentification.loginRequired, 
+    updateCategory
+);
 
 //DELETE
 /**
@@ -53,6 +71,10 @@ router.put("/:_id", updateCategory);
     * @description Delete a category
     * @access Login required, role Admin required
 */
-router.delete("/:_id", deleteCategory);
+router.delete(
+    "/:_id", 
+    authentification.loginRequired,
+    deleteCategory
+);
 
 module.exports = router;
