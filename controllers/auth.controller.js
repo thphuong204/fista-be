@@ -11,7 +11,6 @@ const {
     try {
       const { email, password } = req.body;
       let user = await User.findOne({ email });
-      console.log("password",  password);
 
       if (!user)
         return next(new AppError(400, "Invalid credentials", "Login Error"));
@@ -25,7 +24,6 @@ const {
       
       user = await User.findOne({ email }, {"password": 0})
       accessToken = await user.generateToken();
-      console.log("accessToken", accessToken)
       return sendResponse(
         res,
         200,

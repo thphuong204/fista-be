@@ -28,12 +28,11 @@ categoryController.createCategory = async (req, res, next) => {
 // Get all categories by User, Admin
 categoryController.getCategories = async (req, res, next) => {
     try {
-        const acceptedFilterKeyArr = ["accessToken", "name", "page", "limit"];
+        const acceptedFilterKeyArr = ["name", "page", "limit"];
         const {...filter} = req.query;
 
         keywordQueryCheck( filter, acceptedFilterKeyArr )
-        console.log("filter:", filter)
-        const {accessToken, name, classification} = req.body;
+        const { name, classification} = req.body;
 
         let total = await Category.countDocuments(filter);
         if (!total) {
@@ -48,7 +47,6 @@ categoryController.getCategories = async (req, res, next) => {
         } else {
            page_size = Number.parseInt(req.query.limit) || 20; 
         }
-        console.log( "page_size: ", page_size)
         //skip number
         let offset = page_size * (page_number - 1);
         const listOfCategories = await Category.find(filter)

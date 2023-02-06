@@ -4,8 +4,6 @@ const { AppError } = require("../helpers/utils");
 const authMiddleware = {};
 
 authMiddleware.loginRequired = (req, res, next) => {
-
-  console.log("token ", req.headers.authorization)
   try {
     const tokenString = req.headers.authorization;
     if (!tokenString)

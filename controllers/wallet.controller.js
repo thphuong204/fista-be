@@ -6,7 +6,6 @@ const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelp
 
 // Create a new wallet
 walletController.createWallet = async (req, res, next) => {
-    console.log("createWallet");
     try {
         if (!req.body) throw new AppError(400, "No request body", "Bad Request");
         
@@ -30,7 +29,6 @@ walletController.createWallet = async (req, res, next) => {
 
 // Get all wallets
 walletController.getWallets = async (req, res, next) => {
-    console.log("getWallet")
     try {
         const acceptedFilterKeyArr = ["name", "page", "limit"];
         const {...filter} = req.query;
@@ -69,7 +67,6 @@ walletController.getWallets = async (req, res, next) => {
 
 // Get wallet by Id
 walletController.getWalletById = async (req, res, next) => {
-    console.log("getWalletById");
     try {
         if (!req.params._id)
           throw new AppError(400, "Wallet Id Not Found", "Bad Request");
@@ -89,7 +86,6 @@ walletController.getWalletById = async (req, res, next) => {
 
 // Update wallet
 walletController.updateWallet = async (req, res, next) => {
-    console.log("updateWallet");
     try {
         if (!req.body || !req.params._id) {
             throw new AppError(400, "Requiring body and id to update wallet", "Bad Request")
@@ -128,7 +124,6 @@ walletController.updateWallet = async (req, res, next) => {
 
 // Delete wallet
 walletController.deleteWallet = async (req, res, next) => {
-    console.log("deleteWallet");
     try {
         if (!req.params._id) {
             throw new AppError(404, "Wallet Not Found", "Bad request")

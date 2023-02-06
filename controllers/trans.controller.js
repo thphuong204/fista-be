@@ -60,7 +60,6 @@ transController.getTransactions = async (req, res, next) => {
     } = keywordQueryCheck (filter, acceptedFilterKeyArr);
 
     //mongoose support find with case insensitive
-    console.log("filter trans: " , filter)
     const page_number = req.query.page || 1;
     const page_size = req.query.limit || 20;
     //skip number
@@ -132,7 +131,6 @@ transController.getTransactions = async (req, res, next) => {
 // Get transaction by id
 //Initialize
 transController.getTransactionById = async (req, res, next) => {
-  console.log("getTransactionById");
   try {
     if (!req.params._id)
       throw new AppError(400, "Transaction Id Not Found", "Bad Request");
@@ -153,7 +151,6 @@ transController.getTransactionById = async (req, res, next) => {
 // Updating transaction
 //Initialize
 transController.updateTransaction = async (req, res, next) => {
-  console.log("Updating transaction");
   try {
     if (!req.body || !req.params._id) {
         throw new AppError(400, "Requiring body and id to update transaction", "Bad Request")
@@ -190,7 +187,6 @@ transController.updateTransaction = async (req, res, next) => {
 // Delete transaction
 //Initialize
 transController.deleteTransaction = async (req, res, next) => {
-  console.log("Delete transaction");
   try {
     if (!req.params._id) {
         throw new AppError(404, "Transaction Not Found", "Bad request")

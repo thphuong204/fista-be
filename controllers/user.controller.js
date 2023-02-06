@@ -7,7 +7,6 @@ const users_role_array = ["user", "admin"];
 
 // Create a new user
 userController.createUser = async ( req, res, next ) => {
-    console.log("createUser");
     try {
         if (!req.body) throw new AppError(400, "No request body", "Bad Request");
         let { name, email, password } = req.body;

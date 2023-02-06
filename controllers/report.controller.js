@@ -23,8 +23,6 @@ reportController.getReport = async (req, res, next) => {
         toDate: toDate,
       } = keywordQueryCheck(filter, acceptedFilterKeyArr);
       
-
-      console.log("filter", filter)
       let groupByMonth = null;
       let groupByWeek = null;
       let groupByCategory = null;
