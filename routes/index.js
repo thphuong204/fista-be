@@ -27,4 +27,8 @@ router.use('/categories',categoryAPI);
 const transAPI = require('./transs.api');
 router.use('/transs', transAPI)
 
+// reportApi
+const reportAPI = require('./report.api');
+router.use('/report', reportAPI)
+
 module.exports = router;

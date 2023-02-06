@@ -13,59 +13,150 @@ reportController.getReport = async (req, res, next) => {
         "wallet",
         "category",
         "fromDate",
-        "toDate",
-        "amount",
-        "description",
-        "page",
-        "limit"
+        "toDate"
       ];
-      const filter = req.query;
-  
+      const {...filter} = req.query;
       const {
         wallet: tmpWallet,
         category: tmpCategory,
         fromDate: fromDate,
         toDate: toDate,
-        amount: tmpAmount,
-        description: tmpDescription,
       } = keywordQueryCheck(filter, acceptedFilterKeyArr);
+      
+
+      console.log("filter", filter)
+      let groupByMonth = null;
+      let groupByWeek = null;
+      let groupByCategory = null;
+      let total = null
+
+      if (filter?.wallet) {
+        //   MongoDb does the group by date
+        groupByMonth = await Transaction.aggregate([
+          {$match: {
+            "user": req.user,
+            "wallet": filter.wallet,
+            "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+            "is_deleted" : false
+          }},
+          {$sort: { date: -1 }},
+          {$set: { month: {"$month": "$date"} }},
+          {$group: {
+            _id: {
+              month: "$month",
+              category: "$category"
+            },
+            totalAmount: {$sum: "amount"}
+          }}
+        ]);
+
+        groupByWeek = await Transaction.aggregate([
+          {$match: {
+            "user": req.user,
+            "wallet": filter.wallet,
+            "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+            "is_deleted" : false
+          }},
+          {$sort: { date: -1 }},
+          {$set: { week: {"$week":"$date"} }},
+          {$group: {
+            _id: {
+              month: "$week",
+              category: "$category"
+            },
+            totalAmount: {$sum: "amount"}
+          }}
+        ]);
+
+        groupByCategory = await Transaction.aggregate([
+        {"$match": {
+          "user": req.user,
+          "wallet": filter.wallet,
+          "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+          "is_deleted" : false
+        }},
+        {"$sort": { "date": -1 }},
+        {"$group": { 
+          _id: "$category", 
+          numOfTrans: { $sum: 1 }, 
+          totalAmount: {$sum: "$amount"}
+        }}
+      ]);
+
+        total = await Transaction.count({
+          "user": req.user,
+          "wallet": filter.wallet,
+          "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+          "is_deleted" : false
+        });
   
-      //mongoose support find with case insensitive
-      if (tmpWallet) filter.wallet = { $regex: tmpWallet, $options: "i" };
-      if (tmpCategory) filter.category = { $regex: tmpCategory, $options: "i" };
-      if (tmpDescription) filter.description = { $regex: tmpDescription, $options: "i" };
-  
-      const page_number = req.query.page || 1;
-      const page_size = req.query.limit || 20;
-      //skip number
-      let offset = page_size * (page_number - 1);
-  
-    //   MongoDb does the group by date
-      const listOfTranss = await Trans.aggregate([
-        {$match: filter},
-        {$sort: { date: -1 }},
-        {$skip :20},
-        {$limit: 20},
-        {$group: { _id: "$date", details: { $push: "$$ROOT" }}},
-        {
-          $addFields:
-            {
-              totalAmount : { $sum: "$details.amount" }
-            }
-        }
-      ]);;
-  
-      console.log("listOfTranss", listOfTranss)
-      let total = await Trans.count(filter);
+      } else {
+        groupByMonth = await Transaction.aggregate([
+          {$match: {
+            "user": req.user,
+            "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+            "is_deleted" : false
+          }},
+          {$sort: { date: -1 }},
+          {$set: { month: {"$month": "$date"} }},
+          {$group: {
+            _id: {
+              month: "$month",
+              category: "$category"
+            },
+            totalAmount: {$sum: "amount"}
+          }}
+        ]);
+
+        groupByWeek = await Transaction.aggregate([
+          {$match: {
+            "user": req.user,
+            "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+            "is_deleted" : false
+          }},
+          {$sort: { date: -1 }},
+          {$set: { week: {"$week":"$date"} }},
+          {$group: {
+            _id: {
+              month: "$week",
+              category: "$category"
+            },
+            totalAmount: {$sum: "amount"}
+          }}
+        ]);
+
+        groupByCategory = await Transaction.aggregate([
+        {"$match": {
+          "user": req.user,
+          "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+          "is_deleted" : false
+        }},
+        {"$sort": { "date": -1 }},
+        {"$group": { 
+          _id: "$category", 
+          numOfTrans: { $sum: 1 }, 
+          totalAmount: {$sum: "$amount"}
+        }}
+      ]);
+
+        total = await Transaction.count({
+          "user": req.user,
+          "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+          "is_deleted" : false
+        });
+      }
+    
       if (!total) {
-        throw new AppError(404, "Trans Not Found", "Bad request");
+        throw new AppError(404, "Transaction Not Found", "Bad request");
         return;
       }
-  
-      let data = { total, page_size, page_number, items: listOfTranss };
+
+      let data = { groupByMonth, groupByWeek, groupByCategory };
   
       sendResponse(res, 200, true, data, null, "");
     } catch (err) {
       next(err);
     }
 };
+
+module.exports = reportController;
