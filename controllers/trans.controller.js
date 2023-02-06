@@ -60,21 +60,62 @@ transController.getTransactions = async (req, res, next) => {
     } = keywordQueryCheck (filter, acceptedFilterKeyArr);
 
     //mongoose support find with case insensitive
-    filter.user = req.user
-    if (tmpDescription) filter.description = { $regex: tmpDescription, $options: "i" };
-
+    console.log("filter trans: " , filter)
     const page_number = req.query.page || 1;
     const page_size = req.query.limit || 20;
     //skip number
     let offset = page_size * (page_number - 1);
 
-    const listOfTranss = await Transaction.find(filter)
-    .populate("category")
-    .sort({ date: -1 })
-    .skip(offset)
-    .limit(page_size);
+    let listOfTranss = null;
+    let total  = null;
+    if (filter?.wallet) {
+      listOfTranss = await Transaction.find({
+        user: req.user, 
+        wallet: filter.wallet,
+        date: {$gte:filter.fromDate,$lte:filter.toDate}, 
+        description: {
+          "$regex": filter?.description || "",
+          "$options": "i"
+        }
+      })
+      .populate("category")
+      .sort({ date: -1 })
+      .skip(offset)
+      .limit(page_size);
 
-    let total = await Transaction.countDocuments(filter);
+      total = await Transaction.countDocuments({
+        user: req.user,
+        wallet: filter.wallet,
+        date: {$gte:filter.fromDate,$lte:filter.toDate},
+        description: {
+          "$regex": filter?.description || "",
+          "$options": "i"
+        }
+      });
+    } else {
+      listOfTranss = await Transaction.find({
+        user: req.user, 
+        date: {$gte:filter.fromDate,$lte:filter.toDate}, 
+        description: {
+          "$regex": filter?.description || "",
+          "$options": "i"
+        }
+      })
+      .populate("category")
+      .sort({ date: -1 })
+      .skip(offset)
+      .limit(page_size);
+
+      total = await Transaction.countDocuments({
+        user: req.user,
+        date: {$gte:filter.fromDate,$lte:filter.toDate},
+        description: {
+          "$regex": filter?.description || "",
+          "$options": "i"
+        }
+      });
+    }
+    
     if (!total) {
       throw new AppError(404, "Transaction Not Found", "Bad request");
       return;
