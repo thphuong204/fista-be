@@ -4,11 +4,15 @@ const { AppError } = require("./utils");
 validateHelper.keywordQueryCheck = (query, acceptedFilterKeyArr) => {
     const keywordQuerryArr = Object.keys(query);
     // Remove page, limit out of query. These factors will be used directly when finding in collections
-    query.page = "";
-    query.limit = "";
+    if (query.page) {
+        query.page = ""
+    } ;
+    if (query.limit) {
+        query.limit = ""
+    } ;
     if (query?.wallet?.toLowerCase() === "all") {
         query.wallet = ""
-    }
+    };
     
     keywordQuerryArr.forEach((keyword) => {
         if (!acceptedFilterKeyArr.includes(keyword)) {
