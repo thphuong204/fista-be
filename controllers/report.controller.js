@@ -4,35 +4,35 @@ const Transaction = require("../models/Transaction");
 const reportController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
 const { keywordQueryCheck } = require("../helpers/validateHelper");
+const { ObjectId } = require('bson');
 
 // Get report data
 
 reportController.getReport = async (req, res, next) => {
+  const user =  new ObjectId(req.user)
     try {
       const acceptedFilterKeyArr = [
         "wallet",
-        "category",
         "fromDate",
         "toDate"
       ];
       const {...filter} = req.query;
       const {
         wallet: tmpWallet,
-        category: tmpCategory,
         fromDate: fromDate,
         toDate: toDate,
       } = keywordQueryCheck(filter, acceptedFilterKeyArr);
-      
-      let groupByMonth = null;
-      let groupByWeek = null;
-      let groupByCategory = null;
+      console.log("req", req.user)
+      let groupByMonth = [];
+      let groupByWeek = [];
+      let groupByCategory = [];
       let total = null
-
+      console.log("filter after", filter)
       if (filter?.wallet) {
         //   MongoDb does the group by date
         groupByMonth = await Transaction.aggregate([
           {$match: {
-            "user": req.user,
+            "user": user,
             "wallet": filter.wallet,
             "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
             "is_deleted" : false
@@ -50,7 +50,7 @@ reportController.getReport = async (req, res, next) => {
 
         groupByWeek = await Transaction.aggregate([
           {$match: {
-            "user": req.user,
+            "user": user,
             "wallet": filter.wallet,
             "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
             "is_deleted" : false
@@ -68,7 +68,7 @@ reportController.getReport = async (req, res, next) => {
 
         groupByCategory = await Transaction.aggregate([
         {"$match": {
-          "user": req.user,
+          "user": user,
           "wallet": filter.wallet,
           "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
           "is_deleted" : false
@@ -82,16 +82,17 @@ reportController.getReport = async (req, res, next) => {
       ]);
 
         total = await Transaction.count({
-          "user": req.user,
+          "user": user,
           "wallet": filter.wallet,
           "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
           "is_deleted" : false
         });
   
       } else {
+        console.log("else")
         groupByMonth = await Transaction.aggregate([
           {$match: {
-            "user": req.user,
+            "user": user,
             "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
             "is_deleted" : false
           }},
@@ -108,7 +109,7 @@ reportController.getReport = async (req, res, next) => {
 
         groupByWeek = await Transaction.aggregate([
           {$match: {
-            "user": req.user,
+            "user": user,
             "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
             "is_deleted" : false
           }},
@@ -125,7 +126,7 @@ reportController.getReport = async (req, res, next) => {
 
         groupByCategory = await Transaction.aggregate([
         {"$match": {
-          "user": req.user,
+          "user": user,
           "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
           "is_deleted" : false
         }},
@@ -138,10 +139,11 @@ reportController.getReport = async (req, res, next) => {
       ]);
 
         total = await Transaction.count({
-          "user": req.user,
+          "user": user,
           "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
           "is_deleted" : false
         });
+        console.log("groupByMonth", groupByMonth)
       }
     
       if (!total) {
@@ -149,7 +151,7 @@ reportController.getReport = async (req, res, next) => {
         return;
       }
 
-      let data = { groupByMonth, groupByWeek, groupByCategory };
+      let data = { total, groupByMonth, groupByWeek, groupByCategory };
   
       sendResponse(res, 200, true, data, null, "");
     } catch (err) {
