@@ -129,7 +129,7 @@ reportController.getReport = async (req, res, next) => {
           {$sort: { date: -1 }},
           {$set: { day: {"$dayOfYear":"$date"} }},
           {$group: {
-            _id:"$week",
+            _id:"$day",
             transactions: {$push: "$$ROOT"},
             totalAmount: {$sum: "$amount"}
           }}
