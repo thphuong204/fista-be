@@ -44,7 +44,7 @@ reportController.getReport = async (req, res, next) => {
               month: "$month",
               category: "$category"
             },
-            totalAmount: {$sum: "amount"}
+            totalAmount: {"$sum": "$amount"}
           }}
         ]);
 
@@ -58,11 +58,11 @@ reportController.getReport = async (req, res, next) => {
           {$sort: { date: -1 }},
           {$set: { week: {"$week":"$date"} }},
           {$group: {
-            _id: {
+            "_id": {
               month: "$week",
               category: "$category"
             },
-            totalAmount: {$sum: "amount"}
+            totalAmount: {"$sum": "$amount"}
           }}
         ]);
 
@@ -76,8 +76,8 @@ reportController.getReport = async (req, res, next) => {
         {"$sort": { "date": -1 }},
         {"$group": { 
           _id: "$category", 
-          numOfTrans: { $sum: 1 }, 
-          totalAmount: {$sum: "$amount"}
+          numOfTrans: { "$sum": 1 }, 
+          totalAmount: {"$sum": "$amount"}
         }}
       ]);
 
@@ -99,11 +99,9 @@ reportController.getReport = async (req, res, next) => {
           {$sort: { date: -1 }},
           {$set: { month: {"$month": "$date"} }},
           {$group: {
-            _id: {
-              month: "$month",
-              category: "$category"
-            },
-            totalAmount: {$sum: "amount"}
+            _id: "$month",
+            transactions: {$push: "$$ROOT"},
+            totalAmount: {$sum: "$amount"}
           }}
         ]);
 
@@ -116,11 +114,24 @@ reportController.getReport = async (req, res, next) => {
           {$sort: { date: -1 }},
           {$set: { week: {"$week":"$date"} }},
           {$group: {
-            _id: {
-              month: "$week",
-              category: "$category"
-            },
-            totalAmount: {$sum: "amount"}
+            _id:"$week",
+            transactions: {$push: "$$ROOT"},
+            totalAmount: {$sum: "$amount"}
+          }}
+        ]);
+
+        groupByDay = await Transaction.aggregate([
+          {$match: {
+            "user": user,
+            "date": {"$gte": new Date(filter.fromDate),"$lte": new Date(filter.toDate)},
+            "is_deleted" : false
+          }},
+          {$sort: { date: -1 }},
+          {$set: { day: {"$dayOfYear":"$date"} }},
+          {$group: {
+            _id:"$week",
+            transactions: {$push: "$$ROOT"},
+            totalAmount: {$sum: "$amount"}
           }}
         ]);
 
@@ -151,7 +162,7 @@ reportController.getReport = async (req, res, next) => {
         return;
       }
 
-      let data = { total, groupByMonth, groupByWeek, groupByCategory };
+      let data = { total, groupByMonth, groupByWeek, groupByDay, groupByCategory };
   
       sendResponse(res, 200, true, data, null, "");
     } catch (err) {
