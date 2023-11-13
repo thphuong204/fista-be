@@ -6,11 +6,6 @@ var router = express.Router();
 const authApi = require("./auth.api");
 router.use("/auth", authApi);
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.status(200).send("Welcome to CoderSchool!")
-});
-
 // userApi
 const userAPI = require('./users.api');
 router.use('/users',userAPI);

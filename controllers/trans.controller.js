@@ -114,11 +114,6 @@ transController.getTransactions = async (req, res, next) => {
         }
       });
     }
-    
-    if (!total) {
-      throw new AppError(404, "Transaction Not Found", "Bad request");
-      return;
-    }
 
     let data = { total, page_size, page_number, items: listOfTranss };
 
