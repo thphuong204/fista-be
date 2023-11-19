@@ -20,7 +20,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
 
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+mongoose.set("strictQuery", false);
 /* DB connection*/
 const mongoURI = process.env.MONGODB_URI;
 

@@ -75,7 +75,8 @@ transController.getTransactions = async (req, res, next) => {
         description: {
           "$regex": filter?.description || "",
           "$options": "i"
-        }
+        },
+        is_deleted: { $eq: false } 
       })
       .populate("category")
       .sort({ date: -1 })
@@ -89,7 +90,8 @@ transController.getTransactions = async (req, res, next) => {
         description: {
           "$regex": filter?.description || "",
           "$options": "i"
-        }
+        },
+        is_deleted: { $eq: false } 
       });
     } else {
       listOfTranss = await Transaction.find({
@@ -98,7 +100,8 @@ transController.getTransactions = async (req, res, next) => {
         description: {
           "$regex": filter?.description || "",
           "$options": "i"
-        }
+        },
+        is_deleted: { $eq: false } 
       })
       .populate("category")
       .sort({ date: -1 })
@@ -111,12 +114,13 @@ transController.getTransactions = async (req, res, next) => {
         description: {
           "$regex": filter?.description || "",
           "$options": "i"
-        }
+        },
+                is_deleted: { $eq: false } 
       });
     }
     
     if (!total) {
-      throw new AppError(404, "Transaction Not Found", "Bad request");
+      throw new AppError(404, `No transaction from ${fromDate} to ${toDate}`, "Bad request");
       return;
     }
 
@@ -193,7 +197,7 @@ transController.deleteTransaction = async (req, res, next) => {
         return
     }
     const user = req.user
-    const { _id } = req.params;
+    const  _id  = req.params;
     const options = { new: true };
 
     //only delete transaction not yet deleted
