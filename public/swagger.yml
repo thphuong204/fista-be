@@ -129,7 +129,7 @@ paths:
           description: User not found
         '204':
           description: Deleted, no content
-  /trans:
+  /transs:
     post:
       tags:
         - Trans
@@ -200,6 +200,17 @@ paths:
             type: string
           required: false 
           description: Name of category
+        - in: query
+          name: fromDate
+          schema:
+            type: datetime
+          required: false 
+        - in: query
+          name: toDate
+          schema:
+            type: datetime
+          required: false 
+          
       responses:
         '400':
           description: Bad request
@@ -211,7 +222,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trans'            
-  /trans/{id}:
+  /transs/{id}:
     get:
       tags:
         - Trans
@@ -748,4 +759,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Category'   
-        
+  securitySchemes:
+    bearerAuth:           
+      type: http
+      scheme: bearer
+      bearerFormat: JWT   
+security:
+  - bearerAuth: []  
