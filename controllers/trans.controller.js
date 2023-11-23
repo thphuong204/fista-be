@@ -4,6 +4,7 @@ const Transaction = require("../models/Transaction");
 const transController = {};
 const { sendResponse, AppError } = require("../helpers/utils");
 const { keywordQueryCheck, keywordBodyCheck } = require("../helpers/validateHelper");
+const { format, parseISO } = require('date-fns');
 
 // Create a new transaction
 transController.createTransaction = async (req, res, next) => {
@@ -118,9 +119,12 @@ transController.getTransactions = async (req, res, next) => {
                 is_deleted: { $eq: false } 
       });
     }
+
+    var fromDateString = format(Date.parse(fromDate),"dd-MMM-yyyy")
+    var toDateString = format(Date.parse(toDate),"dd-MMM-yyyy")
     
     if (!total) {
-      throw new AppError(404, `No transaction from ${fromDate} to ${toDate}`, "Bad request");
+      throw new AppError(404, `No transaction from ${fromDateString} to ${toDateString}`, "Bad request");
       return;
     }
 
